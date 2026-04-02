@@ -8,72 +8,26 @@
 <body>
 
 <div class="container">
+    <h2>Login</h2>
 
-<h2>Login</h2>
+    <label for="username">Username</label>
+    <input type="text" id="username">
 
-<label for="username">Username</label>
-<input type="text" id="username">
+    <label for="password">Password</label>
+    <input type="password" id="password">
 
-<label for="password">Password</label>
-<input type="password" id="password">
+    <button onclick="login()">Login</button>
 
-<button onclick="login()">Login</button>
+    <div class="result-box">
+        <p id="result"></p>
+    </div>
 
-<div class="result-box">
-<p id="result"></p>
+    <div class="link">
+        <a href="register.html">Create account</a>
+    </div>
 </div>
 
-<div class="link">
-<a href="register.html">Create account</a>
-</div>
-
-</div>
-
-<script>
-async function login() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    const soapRequest = `
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                  xmlns:aut="http://example.com/auth">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <aut:LoginUserRequest>
-         <aut:username>${username}</aut:username>
-         <aut:password>${password}</aut:password>
-      </aut:LoginUserRequest>
-   </soapenv:Body>
-</soapenv:Envelope>`;
-
-    try {
-        const response = await fetch("http://localhost:8080/ws", {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/xml;charset=UTF-8"
-            },
-            body: soapRequest
-        });
-
-        const text = await response.text();
-        document.getElementById("result").innerText = text;
-
-        const tokenMatch = text.match(/<ns2:token>(.*?)<\/ns2:token>/);
-
-        if (tokenMatch && tokenMatch[1]) {
-            localStorage.setItem("token", tokenMatch[1]);
-            alert("Login successful. Token saved.");
-            window.location.href = "profile.html";
-        } else {
-            alert("Login failed. Check username/password.");
-        }
-
-    } catch (error) {
-        console.error("Login error:", error);
-        alert("Error during login.");
-    }
-}
-</script>
-
+<script src="js/config.js"></script>
+<script src="js/login.js"></script>
 </body>
 </html>

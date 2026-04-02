@@ -8,63 +8,26 @@
 <body>
 
 <div class="container">
+    <h2>Register</h2>
 
-<h2>Register</h2>
+    <label for="username">Username</label>
+    <input type="text" id="username">
 
-<label for="username">Username</label>
-<input type="text" id="username">
+    <label for="password">Password</label>
+    <input type="password" id="password">
 
-<label for="password">Password</label>
-<input type="password" id="password">
+    <button onclick="registerUser()">Register</button>
 
-<button onclick="registerUser()">Register</button>
+    <div class="result-box">
+        <p id="result"></p>
+    </div>
 
-<div class="result-box">
-<p id="result"></p>
+    <div class="link">
+        <a href="login.html">Back to login</a>
+    </div>
 </div>
 
-<div class="link">
-<a href="login.html">Back to login</a>
-</div>
-
-</div>
-
-<script>
-async function registerUser() {
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    const soapRequest = `
-<soapenv:Envelope xmlns:soapenv="http://schemas.xmlsoap.org/soap/envelope/"
-                  xmlns:aut="http://example.com/auth">
-   <soapenv:Header/>
-   <soapenv:Body>
-      <aut:RegisterUserRequest>
-         <aut:username>${username}</aut:username>
-         <aut:password>${password}</aut:password>
-      </aut:RegisterUserRequest>
-   </soapenv:Body>
-</soapenv:Envelope>`;
-
-    try {
-        const response = await fetch("http://localhost:8080/ws", {
-            method: "POST",
-            headers: {
-                "Content-Type": "text/xml;charset=UTF-8"
-            },
-            body: soapRequest
-        });
-
-        const text = await response.text();
-        document.getElementById("result").innerText = text;
-        alert("Register request sent.");
-
-    } catch (error) {
-        console.error("Register error:", error);
-        alert("Error during register.");
-    }
-}
-</script>
-
+<script src="js/config.js"></script>
+<script src="js/register.js"></script>
 </body>
 </html>
