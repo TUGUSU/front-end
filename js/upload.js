@@ -9,7 +9,13 @@ async function uploadProfileImage() {
 
     const token = localStorage.getItem("token");
 
+    if (!token) {
+        alert("Please login first.");
+        return;
+    }
+
     try {
+        // ================= STEP 1: GET PRESIGNED URL =================
         const presignedResponse = await fetch(
             CONFIG.FILE_BASE_URL + "/presigned-url",
             {
@@ -25,11 +31,18 @@ async function uploadProfileImage() {
             }
         );
 
+        if (!presignedResponse.ok) {
+            throw new Error("Failed to get presigned URL");
+        }
+
         const presignedData = await presignedResponse.json();
 
         const uploadUrl = presignedData.uploadUrl;
         const fileUrl = presignedData.fileUrl;
 
+        console.log("Presigned URL:", presignedData);
+
+        // ================= STEP 2: UPLOAD TO S3 =================
         const uploadResult = await fetch(uploadUrl, {
             method: "PUT",
             headers: {
@@ -42,11 +55,38 @@ async function uploadProfileImage() {
             throw new Error("Upload to S3 failed");
         }
 
-        document.getElementById("imageUrl").value = fileUrl;
-        document.getElementById("imagePreview").src = fileUrl;
-        document.getElementById("imagePreview").style.display = "block";
+        console.log("Uploaded to S3 successfully");
 
-        alert("Upload successful via presigned URL!");
+        // ================= STEP 3: UPDATE UI =================
+        document.getElementById("imageUrl").value = fileUrl;
+
+        const preview = document.getElementById("imagePreview");
+        preview.src = fileUrl;
+        preview.style.display = "block";
+
+        // ================= STEP 4: CALL BACKEND (SEND EMAIL) =================
+        const notifyResponse = await fetch(
+            CONFIG.FILE_BASE_URL + "/notify-upload-success",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    fileUrl: fileUrl
+                })
+            }
+        );
+
+        if (!notifyResponse.ok) {
+            console.warn("Email notification failed");
+        } else {
+            console.log("Email sent successfully");
+        }
+
+        alert("Upload successful + Email sent!");
 
     } catch (error) {
         console.error("Upload error:", error);
