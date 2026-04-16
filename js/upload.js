@@ -1,38 +1,55 @@
 async function uploadProfileImage() {
-    const fileInput = document.getElementById("profileImageFile");
+    const fileInput = document.getElementById("fileInput");
     const file = fileInput.files[0];
 
     if (!file) {
-        alert("Please select an image file.");
+        alert("Please select a file.");
         return;
     }
 
-    const formData = new FormData();
-    formData.append("file", file);
+    const token = localStorage.getItem("token");
 
     try {
-        const response = await fetch(CONFIG.FILE_BASE_URL + "/upload", {
-            method: "POST",
+        const presignedResponse = await fetch(
+            CONFIG.FILE_BASE_URL + "/presigned-url",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": "Bearer " + token
+                },
+                body: JSON.stringify({
+                    fileName: file.name,
+                    contentType: file.type
+                })
+            }
+        );
+
+        const presignedData = await presignedResponse.json();
+
+        const uploadUrl = presignedData.uploadUrl;
+        const fileUrl = presignedData.fileUrl;
+
+        const uploadResult = await fetch(uploadUrl, {
+            method: "PUT",
             headers: {
-                "Authorization": "Bearer " + getToken()
+                "Content-Type": file.type
             },
-            body: formData
+            body: file
         });
 
-        const result = await response.json();
-
-        if (response.ok) {
-            document.getElementById("profileImageUrl").value = result.url;
-            document.getElementById("uploadedImagePreview").src = result.url;
-            document.getElementById("uploadedImagePreview").style.display = "block";
-            showResult(result);
-            alert("Image uploaded successfully.");
-        } else {
-            showResult(result);
-            alert("Image upload failed.");
+        if (!uploadResult.ok) {
+            throw new Error("Upload to S3 failed");
         }
+
+        document.getElementById("imageUrl").value = fileUrl;
+        document.getElementById("imagePreview").src = fileUrl;
+        document.getElementById("imagePreview").style.display = "block";
+
+        alert("Upload successful via presigned URL!");
+
     } catch (error) {
         console.error("Upload error:", error);
-        alert("Error uploading image.");
+        alert("Upload failed.");
     }
 }
