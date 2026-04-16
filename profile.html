@@ -11,20 +11,24 @@
 
     <h2>Profile Management</h2>
 
+    <!-- ================= UPLOAD IMAGE ================= -->
     <h3 class="section-title">Upload Profile Image</h3>
 
-    <label for="profileImageFile">Select Image</label>
-    <input type="file" id="profileImageFile" accept="image/*">
+    <label for="fileInput">Select Image</label>
+    <input type="file" id="fileInput" accept="image/*">
 
     <button onclick="uploadProfileImage()">Upload Image</button>
 
-    <label for="profileImageUrl">Uploaded Image URL</label>
-    <input type="text" id="profileImageUrl" readonly>
+    <label for="imageUrl">Uploaded Image URL</label>
+    <input type="text" id="imageUrl" readonly>
 
-    <img id="uploadedImagePreview" alt="Uploaded Image Preview" style="display:none; max-width:100%; margin-bottom:20px; border-radius:8px;">
+    <img id="imagePreview"
+         alt="Uploaded Image Preview"
+         style="display:none; max-width:100%; margin-bottom:20px; border-radius:8px;">
 
     <hr>
 
+    <!-- ================= CREATE USER ================= -->
     <h3 class="section-title">Create User</h3>
 
     <label for="createId">ID</label>
@@ -46,6 +50,7 @@
 
     <hr>
 
+    <!-- ================= GET USER ================= -->
     <h3 class="section-title">Get User by ID</h3>
 
     <label for="getUserId">User ID</label>
@@ -55,6 +60,7 @@
 
     <hr>
 
+    <!-- ================= UPDATE USER ================= -->
     <h3 class="section-title">Update User</h3>
 
     <label for="updateId">User ID</label>
@@ -76,6 +82,7 @@
 
     <hr>
 
+    <!-- ================= DELETE USER ================= -->
     <h3 class="section-title">Delete User</h3>
 
     <label for="deleteId">User ID</label>
@@ -85,6 +92,7 @@
 
     <hr>
 
+    <!-- ================= RESULT ================= -->
     <span class="result-label">Result</span>
     <div class="result-box">
         <pre id="result">No result yet.</pre>
@@ -95,5 +103,6 @@
 <script src="js/config.js"></script>
 <script src="js/profile.js"></script>
 <script src="js/upload.js"></script>
+
 </body>
 </html>
