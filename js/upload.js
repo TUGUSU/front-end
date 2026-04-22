@@ -15,7 +15,7 @@ async function uploadProfileImage() {
     }
 
     try {
-        // ================= STEP 1: GET PRESIGNED URL =================
+        // STEP 1: Request presigned URL from backend
         const presignedResponse = await fetch(
             CONFIG.FILE_BASE_URL + "/presigned-url",
             {
@@ -32,17 +32,17 @@ async function uploadProfileImage() {
         );
 
         if (!presignedResponse.ok) {
-            throw new Error("Failed to get presigned URL");
+            const errorText = await presignedResponse.text();
+            throw new Error("Failed to get presigned URL: " + errorText);
         }
 
         const presignedData = await presignedResponse.json();
-
         const uploadUrl = presignedData.uploadUrl;
         const fileUrl = presignedData.fileUrl;
 
         console.log("Presigned URL:", presignedData);
 
-        // ================= STEP 2: UPLOAD TO S3 =================
+        // STEP 2: Upload file directly to S3
         const uploadResult = await fetch(uploadUrl, {
             method: "PUT",
             headers: {
@@ -52,19 +52,26 @@ async function uploadProfileImage() {
         });
 
         if (!uploadResult.ok) {
-            throw new Error("Upload to S3 failed");
+            const uploadText = await uploadResult.text();
+            throw new Error("Upload to S3 failed: " + uploadText);
         }
 
         console.log("Uploaded to S3 successfully");
 
-        // ================= STEP 3: UPDATE UI =================
-        document.getElementById("imageUrl").value = fileUrl;
-
+        // STEP 3: Update UI
+        const profileImageUrlInput = document.getElementById("profileImageUrl");
         const preview = document.getElementById("imagePreview");
-        preview.src = fileUrl;
-        preview.style.display = "block";
 
-        // ================= STEP 4: CALL BACKEND (SEND EMAIL) =================
+        if (profileImageUrlInput) {
+            profileImageUrlInput.value = fileUrl;
+        }
+
+        if (preview) {
+            preview.src = fileUrl;
+            preview.style.display = "block";
+        }
+
+        // STEP 4: Notify backend to send email
         const notifyResponse = await fetch(
             CONFIG.FILE_BASE_URL + "/notify-upload-success",
             {
@@ -81,12 +88,13 @@ async function uploadProfileImage() {
         );
 
         if (!notifyResponse.ok) {
-            console.warn("Email notification failed");
+            const notifyText = await notifyResponse.text();
+            console.warn("Email notification failed:", notifyText);
         } else {
             console.log("Email sent successfully");
         }
 
-        alert("Upload successful + Email sent!");
+        alert("Upload successful!");
 
     } catch (error) {
         console.error("Upload error:", error);
